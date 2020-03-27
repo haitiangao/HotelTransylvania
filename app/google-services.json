@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "601723892535",
+    "firebase_url": "https://hotelregistering.firebaseio.com",
+    "project_id": "hotelregistering",
+    "storage_bucket": "hotelregistering.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601723892535:android:8e69756eba5c62961ce0b2",
+        "android_client_info": {
+          "package_name": "com.example.hoteltransylvania"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "601723892535-5tib3ltcejmiaka4b98om2j8uitvnpvb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUNUh8lAPAh7ohCNlE1WPnTKvvVDZv8r4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "601723892535-5tib3ltcejmiaka4b98om2j8uitvnpvb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
