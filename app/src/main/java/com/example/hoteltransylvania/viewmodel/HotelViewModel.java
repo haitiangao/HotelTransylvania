@@ -22,33 +22,34 @@ import io.reactivex.schedulers.Schedulers;
 
 public class HotelViewModel extends AndroidViewModel {
     private FirebaseEvents firebaseEvent;
-    private HotelRoom currentHotelRoom;
+    private static HotelRoom currentHotelRoom;
     private Booking currentBooking;
     private Clerk currentClerk;
 
     public HotelViewModel(@NonNull Application application) {
         super(application);
         firebaseEvent = new FirebaseEvents();
-
+        firebaseEvent.setBookings();
+        firebaseEvent.setClerks();
+        firebaseEvent.setHotelRooms();
     }
 
     public Observable<List<Booking>> getBookings() {
         return firebaseEvent.getBookings()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io());
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
-
 
     public Observable<List<HotelRoom>> getHotelRooms() {
         return firebaseEvent.getHotelRooms()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io());
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<List<Clerk>> getClerks() {
         return firebaseEvent.getClerks()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io());
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void sendNewBooking(String ID, String name) {

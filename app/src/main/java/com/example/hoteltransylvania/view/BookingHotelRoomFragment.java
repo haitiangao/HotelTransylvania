@@ -22,6 +22,7 @@ import com.example.hoteltransylvania.util.DebugLogger;
 import com.example.hoteltransylvania.viewmodel.HotelViewModel;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -34,8 +35,9 @@ public class BookingHotelRoomFragment extends Fragment {
     private HotelRoom hotelRoom;
     private Booking booking;
     private HotelViewModel hotelViewModel;
-
+    private static List<Booking> bookingList = new ArrayList<>();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
 
     @BindView(R.id.bookingImage)
     ImageView bookingImage;
@@ -67,11 +69,11 @@ public class BookingHotelRoomFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        hotelViewModel = new ViewModelProvider(this).get(HotelViewModel.class);
-
-
         ButterKnife.bind(this,view);
-        hotelRoom = ((MainActivity)getActivity()).getCurrentHotelEntity();
+        DebugLogger.logDebug("view created");
+
+        hotelViewModel = new ViewModelProvider(this).get(HotelViewModel.class);
+        hotelRoom = hotelViewModel.getHotelRoomInstance();
 
         //Glide.with(this).load(hotelRoomEntity.getImageUrl()).into(bookingImage);
         roomNumberView.setText("Room Number: "+hotelRoom.getHotelRoomNumber());
@@ -80,15 +82,17 @@ public class BookingHotelRoomFragment extends Fragment {
 
 
         if (!hotelRoom.isAvailable()){
-            DebugLogger.logDebug("unavailable");
             addBookingButton.setEnabled(false);
             namedEdit.setVisibility(View.INVISIBLE);
             namedEdit.setEnabled(false);
             guestNameView.setVisibility(View.VISIBLE);
             guestNameView.setEnabled(true);
 
-            compositeDisposable.add(((MainActivity)getContext()).getAllBookings().subscribe(rxBookingList -> {
-                     unavailableRoom(rxBookingList);
+            compositeDisposable.add(hotelViewModel.getBookings().subscribe(rxBookingList -> {
+                DebugLogger.logDebug("test room: "+rxBookingList.size());
+
+                unavailableRoom(rxBookingList);
+
                     }, throwable -> {
                 DebugLogger.logError(throwable);
 
@@ -101,10 +105,15 @@ public class BookingHotelRoomFragment extends Fragment {
 
     }
 
-    public void unavailableRoom(List<Booking> rxBookingList){
+
+
+    public void unavailableRoom(List<Booking> rxBookingList) {
+
+        //DebugLogger.logDebug("Unavailable room: "+rxBookingList.size()+"");
+
         for (int i=0; i<rxBookingList.size();i++)
         {
-            DebugLogger.logDebug("Stuff:" +rxBookingList.get(i).getGuestName());
+            //DebugLogger.logDebug("Stuff:" +rxBookingList.get(i).getGuestName());
 
             if (rxBookingList.get(i).getHotelRoomID().equals(hotelRoom.getHotelPushKey()))
                 booking = rxBookingList.get(i);
@@ -126,15 +135,15 @@ public class BookingHotelRoomFragment extends Fragment {
 
     @OnClick(R.id.backFButton)
     public void backToPrevious(View view){
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
 
         ((MainActivity)getContext()).backFromBooking();
 
-        }
+    }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+
+    public void disposeEverything(){
         compositeDisposable.dispose();
     }
+
 }

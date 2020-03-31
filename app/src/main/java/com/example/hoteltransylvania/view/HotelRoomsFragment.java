@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,7 +33,7 @@ import io.reactivex.disposables.CompositeDisposable;
 
 public class HotelRoomsFragment extends Fragment implements RecyclerAdapter.UserClickListener {
 
-    private List<HotelRoom> hotelRoomList = new ArrayList<>();
+    private static List<HotelRoom> hotelRoomList = new ArrayList<>();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private FirebaseEvents firebaseEvents;
     private HotelViewModel hotelViewModel;
@@ -52,60 +53,65 @@ public class HotelRoomsFragment extends Fragment implements RecyclerAdapter.User
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this,view);
+        hotelViewModel = new ViewModelProvider(this).get(HotelViewModel.class);
         //firebaseEvents = new FirebaseEvents();
         DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(), RecyclerView.VERTICAL);
         hotelRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         hotelRecyclerView.setAdapter(new RecyclerAdapter(hotelRoomList,this,getActivity()));
         hotelRecyclerView.addItemDecoration(itemDecoration);
 
-        compositeDisposable.add(((MainActivity)getContext()).getAllHotelRooms().subscribe(rxRoomList -> {
-            refreshView(rxRoomList);
-        }, throwable -> {
-            DebugLogger.logError(throwable);
+        refreshView();
 
-        }));
-
-        DebugLogger.logDebug("Hotel size: "+hotelRoomList.size());
+        DebugLogger.logDebug("Hotel size2: "+hotelRoomList.size());
     }
 
 
     @OnClick(R.id.logoutHotel)
     public void backFromHotel(){
-        compositeDisposable.dispose();
+        compositeDisposable.clear();
         ((MainActivity)getContext()).clerkLoggedOut();
     }
 
     @OnClick(R.id.addHotelRoomButton)
     public void createNewRoom(){
-        ((MainActivity)getContext()).makeNewRoom(hotelRoomList.size());
-        compositeDisposable.add(((MainActivity)getContext()).getAllHotelRooms().subscribe(rxRoomList -> {
-            refreshView(rxRoomList);
+
+        hotelViewModel.sendNewHotelRoom(hotelRoomList.size());
+        compositeDisposable.add(hotelViewModel.getHotelRooms().subscribe(rxRoomList -> {
+                hotelRoomList=rxRoomList;
         }, throwable -> {
             DebugLogger.logError(throwable);
 
-        }));
+        }, ()->{
+            DebugLogger.logDebug("Hotel size1: "+hotelRoomList.size());
+
+            refreshView();
+                }
+
+        ));
     }
+
 
     @Override
     public void displayHotelRoom(HotelRoom hotelRoom){
+        hotelViewModel.setCurrentHotelRoomInstance(hotelRoom);
 
-        ((MainActivity)getContext()).setCurrentHotelRoomInstance(hotelRoom);
         ((MainActivity)getContext()).openCheckFrag();
     }
 
-    private void refreshView(List<HotelRoom> rxRoomList){
-        hotelRoomList = rxRoomList;
-        RecyclerAdapter recycleAdaptor = new RecyclerAdapter(rxRoomList, this,getActivity());
-        hotelRecyclerView.setAdapter(null);
-        hotelRecyclerView.setAdapter(recycleAdaptor);
-        recycleAdaptor.notifyDataSetChanged();
+    public void refreshView(){
+        compositeDisposable.add(hotelViewModel.getHotelRooms().subscribe(rxRoomList -> {
+            hotelRoomList=rxRoomList;
+            RecyclerAdapter recycleAdaptor = new RecyclerAdapter(rxRoomList, this,getActivity());
+            hotelRecyclerView.setAdapter(null);
+            hotelRecyclerView.setAdapter(recycleAdaptor);
+            recycleAdaptor.notifyDataSetChanged();
+            DebugLogger.logDebug("Hotel size1: "+hotelRoomList.size());
+
+            }, throwable -> DebugLogger.logError(throwable)));
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
+
     public void disposeEverything(){
         compositeDisposable.dispose();
     }

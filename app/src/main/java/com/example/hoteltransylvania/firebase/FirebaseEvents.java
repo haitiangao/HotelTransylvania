@@ -1,6 +1,8 @@
 package com.example.hoteltransylvania.firebase;
 
 
+import android.os.Debug;
+
 import androidx.annotation.NonNull;
 
 import com.example.hoteltransylvania.model.Booking;
@@ -29,30 +31,44 @@ public class FirebaseEvents {
     private DatabaseReference bookingReference;
     private DatabaseReference hotelReference;
     private DatabaseReference clerkReference;
+    private static List<Booking> bookings = new ArrayList<>();
+    private static List<Clerk> clerks = new ArrayList<>();
+    private static List<HotelRoom> hotelRooms = new ArrayList<>();
 
     public FirebaseEvents(){
         bookingReference = FirebaseDatabase.getInstance().getReference().child("Booking/");
         hotelReference = FirebaseDatabase.getInstance().getReference().child("HotelRoom/");
         clerkReference = FirebaseDatabase.getInstance().getReference().child("Clerk/");
+
+        setBookings();
+        setHotelRooms();
+        setClerks();
     }
 
     public Observable<List<Booking>> getBookings(){
-        List<Booking> bookings = new ArrayList<>();
+        return Observable.just(bookings);
+    }
+
+    public void setBookings(){
         bookingReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
+                bookings.clear();
                 for(DataSnapshot currentSnap : dataSnapshot.getChildren()){
                     Booking currentBooking = currentSnap.getValue(Booking.class);
                     bookings.add(currentBooking);
+                    DebugLogger.logDebug("childname:" +currentBooking.toString());
                 }
+                DebugLogger.logDebug("Observable room2: "+bookings.size());
+
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 //DebugLogger.logError(databaseError);
             }
+
         });
-        return Observable.just(bookings);
+
     }
 
     public void sendNewBooking(Booking booking){
@@ -64,24 +80,27 @@ public class FirebaseEvents {
 
 
     public Observable<List<HotelRoom>> getHotelRooms(){
-        List<HotelRoom> hotelRooms = new ArrayList<>();
+
+        return Observable.just(hotelRooms);
+    }
+
+    public void setHotelRooms(){
         hotelReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
+                hotelRooms.clear();
                 for(DataSnapshot currentSnap : dataSnapshot.getChildren()){
                     HotelRoom currentHotelRoom = currentSnap.getValue(HotelRoom.class);
                     hotelRooms.add(currentHotelRoom);
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 //todo
             }
         });
-        return Observable.just(hotelRooms);
     }
+
 
     public void sendNewHotelRoom(int size){
         String hotelKey = hotelReference.push().getKey();
@@ -105,10 +124,15 @@ public class FirebaseEvents {
     }
 
     public Observable<List<Clerk>> getClerks(){
-        List<Clerk> clerks = new ArrayList<>();
+
+        return Observable.just(clerks);
+    }
+
+    public void setClerks(){
         clerkReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                clerks.clear();
 
                 for(DataSnapshot currentSnap : dataSnapshot.getChildren()){
                     Clerk currentClerk = currentSnap.getValue(Clerk.class);
@@ -121,9 +145,7 @@ public class FirebaseEvents {
                 //todo
             }
         });
-        return Observable.just(clerks);
     }
-
     public void sendNewClerks(Clerk clerk){
         String clerkKey = clerkReference.push().getKey();
         if (clerkKey!=null)

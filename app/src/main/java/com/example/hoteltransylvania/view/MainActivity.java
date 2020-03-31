@@ -128,11 +128,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void backFromBooking() {
+        hotelRooms.refreshView();
         getSupportFragmentManager()
                 .beginTransaction()
                 .remove(bookingHotelRoomFragment)
                 .commit();
     }
+
     public void openCheckFrag() {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -140,37 +142,16 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    public void makeNewRoom(int size){
-        hotelViewModel.sendNewHotelRoom(size);
-    }
 
 
 
-    public Observable<List<HotelRoom>> getAllHotelRooms(){
-        return hotelViewModel.getHotelRooms();
-    }
-    public Observable<List<Booking>> getAllBookings(){
-        return hotelViewModel.getBookings();
-    }
-    public Observable<List<Clerk>> getAllClerks(){
-        return hotelViewModel.getClerks();
-    }
-
-
-    public HotelRoom getCurrentHotelEntity(){
-        return hotelViewModel.getHotelRoomInstance();
-    }
-
-    public void setCurrentHotelRoomInstance(HotelRoom hotelRoomInstance)
-    {
-        hotelViewModel.setCurrentHotelRoomInstance(hotelRoomInstance);
-    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         compositeDisposable.dispose();
         hotelRooms.disposeEverything();
+        bookingHotelRoomFragment.disposeEverything();
     }
 
 }

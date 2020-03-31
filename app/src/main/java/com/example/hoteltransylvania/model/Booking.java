@@ -32,4 +32,12 @@ public class Booking {
     public void setGuestName(String guestName) {
         this.guestName = guestName;
     }
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "hotelRoomID='" + hotelRoomID + '\'' +
+                ", guestName='" + guestName + '\'' +
+                '}';
+    }
 }
